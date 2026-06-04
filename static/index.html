@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>oneM2M Sensor Gateway</title>
+<title>oneM2M Sensor Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg:#0A0E14; --s1:#111720; --s2:#1A2230;
-    --accent:#00E5FF; --ble:#7B61FF; --success:#00C853;
-    --danger:#FF3D3D; --warn:#FFB300;
-    --text:#E8F0F8; --muted:#6B8099; --border:#1E2D40;
+    --bg:#0A0E14;--s1:#111720;--s2:#1A2230;
+    --accent:#00E5FF;--ble:#7B61FF;--wifi:#00C853;
+    --success:#00C853;--danger:#FF3D3D;--warn:#FFB300;
+    --text:#E8F0F8;--muted:#6B8099;--border:#1E2D40;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;}
@@ -20,7 +20,6 @@
     linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);
     background-size:40px 40px;pointer-events:none;z-index:0;}
   .mono{font-family:'Share Tech Mono',monospace;}
-
   header{position:relative;z-index:10;background:var(--s1);border-bottom:1px solid var(--border);
     padding:14px 28px;display:flex;align-items:center;gap:20px;}
   .logo{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--accent);letter-spacing:3px;}
@@ -34,10 +33,8 @@
   .dot.error{background:var(--danger);box-shadow:0 0 6px var(--danger);}
   .dot.warn{background:var(--warn);box-shadow:0 0 6px var(--warn);animation:pulse 1s infinite;}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-
   main{position:relative;z-index:1;padding:20px 28px;
     display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;max-width:1400px;margin:0 auto;}
-
   .card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:18px;
     position:relative;overflow:hidden;animation:fadeIn 0.4s ease both;}
   .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
@@ -46,11 +43,8 @@
   .card.success-color::before{background:linear-gradient(90deg,var(--success),transparent);}
   .card.warn-color::before{background:linear-gradient(90deg,var(--warn),transparent);}
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
   .card-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);
     letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
-
-  /* Sensor grid */
   .sensor-grid{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
   .sensor-card{background:var(--s2);border:1px solid var(--border);border-radius:6px;
     padding:12px 14px;display:flex;flex-direction:column;gap:5px;transition:border-color 0.3s,box-shadow 0.3s;}
@@ -58,20 +52,14 @@
   .sensor-name{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;}
   .sensor-value{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--accent);}
   .sensor-unit{font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
-
-  /* Stats */
   .stat-value{font-family:'Share Tech Mono',monospace;font-size:32px;color:var(--accent);line-height:1;margin-bottom:4px;}
   .stat-label{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
-
-  /* Charts */
   .chart-card{grid-column:1/-1;}
   .chart-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
   .chart-tab{padding:5px 14px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:10px;
     border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;}
   .chart-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,0.08);}
   .chart-wrap{position:relative;height:200px;}
-
-  /* History */
   .history-card{grid-column:1/-1;}
   .history-table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:11px;}
   .history-table th{text-align:left;padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--border);font-size:9px;letter-spacing:1.5px;}
@@ -79,9 +67,8 @@
   .history-table tr:hover td{background:var(--s2);}
   .history-wrap{max-height:180px;overflow-y:auto;}
   .src-ble{color:var(--ble);}
+  .src-wifi{color:var(--wifi);}
   .src-cse{color:var(--success);}
-
-  /* Log */
   .log-card{grid-column:1/-1;}
   .log-container{background:var(--bg);border:1px solid var(--border);border-radius:4px;
     height:120px;overflow-y:auto;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;}
@@ -92,8 +79,6 @@
   .log-line .inf{color:var(--accent);}
   .log-line .ble{color:var(--ble);}
   .log-line .warn{color:var(--warn);}
-
-  /* Architecture */
   .arch-card{grid-column:1/-1;}
   .arch{display:flex;align-items:center;justify-content:center;gap:0;padding:12px 0 6px;flex-wrap:wrap;}
   .arch-node{text-align:center;padding:10px 18px;border:1px solid var(--border);border-radius:6px;
@@ -102,15 +87,15 @@
   .arch-node .n-name{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text);}
   .arch-node.active .n-name{color:var(--accent);}
   .arch-node.ble-node .n-name{color:var(--ble);}
+  .arch-node.wifi-node .n-name{color:var(--wifi);}
+  .arch-node.dash-node .n-name{color:var(--warn);}
   .arch-arrow{padding:0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;}
   .arch-arrow .proto{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
   .arch-arrow .line{width:50px;height:1px;background:linear-gradient(90deg,var(--ble),var(--accent));position:relative;}
   .arch-arrow .line::after{content:'▶';position:absolute;right:-6px;top:-7px;font-size:8px;color:var(--accent);}
-
   ::-webkit-scrollbar{width:4px;}
   ::-webkit-scrollbar-track{background:var(--bg);}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-
   #overlay{position:fixed;inset:0;background:var(--bg);z-index:100;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity 0.5s;}
   #overlay.hidden{opacity:0;pointer-events:none;}
@@ -124,18 +109,18 @@
 
 <div id="overlay">
   <div class="spinner"></div>
-  <div class="overlay-text">CONNECTING TO GATEWAY…</div>
+  <div class="overlay-text">CONNECTING TO CSE…</div>
 </div>
 
 <header>
   <div>
-    <div class="logo">one<span>M2M</span> · SENSOR GATEWAY</div>
-    <div class="header-sub mono">Physical-Layer Agnostic IoT · BLE → oneM2M CSE</div>
+    <div class="logo">one<span>M2M</span> · SENSOR DASHBOARD</div>
+    <div class="header-sub mono">Consumer AE · Subscribes to CSE · Physical-Layer Agnostic IoT</div>
   </div>
   <div class="header-right">
-    <div class="badge"><div class="dot" id="ble-dot"></div><span id="ble-status" class="mono">BLE: —</span></div>
-    <div class="badge"><div class="dot" id="cse-dot"></div><span id="cse-status" class="mono">CSE: —</span></div>
-    <div class="badge"><div class="dot" id="sub-dot"></div><span id="sub-status" class="mono">SUB: —</span></div>
+    <div class="badge"><div class="dot" id="cse-dot"></div><span id="cse-status" class="mono">CSE: -</span></div>
+    <div class="badge"><div class="dot" id="sub-dot"></div><span id="sub-status" class="mono">SUB: -</span></div>
+    <div class="badge"><div class="dot" id="transport-dot"></div><span id="transport-status" class="mono">TRANSPORT: -</span></div>
     <div class="badge"><div class="dot ok"></div><span class="mono" id="ws-status">WS: connected</span></div>
   </div>
 </header>
@@ -143,68 +128,75 @@
 <main>
   <!-- Architecture -->
   <div class="card arch-card">
-    <div class="card-label">System Architecture · oneM2M Interworking Proxy AE Pattern</div>
+    <div class="card-label">System Architecture · oneM2M Physical-Layer Agnosticism</div>
     <div class="arch">
       <div class="arch-node ble-node">
-        <div class="n-label">Field Device</div>
+        <div class="n-label">Field Device · BLE AE</div>
         <div class="n-name">Android BLE</div>
       </div>
       <div class="arch-arrow"><div class="proto">BLE GATT</div><div class="line"></div></div>
       <div class="arch-node active">
         <div class="n-label">Interworking Proxy AE</div>
-        <div class="n-name">Gateway · Mca</div>
+        <div class="n-name">gateway.py</div>
       </div>
-      <div class="arch-arrow"><div class="proto">HTTP/oneM2M</div><div class="line"></div></div>
-      <div class="arch-node active">
-        <div class="n-label">IN-CSE · ACME</div>
-        <div class="n-name">oneM2M CSE</div>
+      <div class="arch-arrow"><div class="proto">Mca / HTTP</div><div class="line"></div></div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+        <div class="arch-node active">
+          <div class="n-label">IN-CSE · ACME</div>
+          <div class="n-name">oneM2M CSE</div>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted)">↑ Mca / HTTP (WiFi mode)</div>
+        <div class="arch-node wifi-node">
+          <div class="n-label">Direct AE · WiFi</div>
+          <div class="n-name">Android WiFi</div>
+        </div>
       </div>
       <div class="arch-arrow"><div class="proto">m2m:sub notify</div><div class="line"></div></div>
-      <div class="arch-node active">
+      <div class="arch-node dash-node">
         <div class="n-label">Consumer AE</div>
-        <div class="n-name">Dashboard</div>
+        <div class="n-name">dashboard.py</div>
       </div>
     </div>
   </div>
 
   <!-- Stats -->
   <div class="card success-color">
-    <div class="card-label">Total Posts to CSE</div>
-    <div class="stat-value" id="stat-posts">0</div>
-    <div class="stat-label">ContentInstances created</div>
+    <div class="card-label">Notifications Received</div>
+    <div class="stat-value" id="stat-receptions">0</div>
+    <div class="stat-label">from CSE subscription</div>
   </div>
   <div class="card">
-    <div class="card-label">Last Update</div>
-    <div class="stat-value" style="font-size:22px" id="stat-time">—</div>
+    <div class="card-label">Last Reception</div>
+    <div class="stat-value" style="font-size:22px" id="stat-time">-</div>
     <div class="stat-label">timestamp</div>
   </div>
   <div class="card ble-color">
-    <div class="card-label">BLE Device</div>
-    <div class="stat-value" style="font-size:18px;color:var(--ble)" id="stat-device">scanning…</div>
-    <div class="stat-label">OneM2M-Sensor</div>
+    <div class="card-label">Last Transport</div>
+    <div class="stat-value" style="font-size:18px;color:var(--ble)" id="stat-transport">-</div>
+    <div class="stat-label">physical layer used</div>
   </div>
 
   <!-- Sensor grid -->
   <div class="sensor-grid" id="sensor-grid">
     <div class="sensor-card">
-      <div class="sensor-name">Waiting for data…</div>
-      <div class="sensor-value" style="color:var(--muted)">—</div>
+      <div class="sensor-name">Waiting for CSE notifications…</div>
+      <div class="sensor-value" style="color:var(--muted)">-</div>
     </div>
   </div>
 
   <!-- Charts -->
   <div class="card chart-card">
-    <div class="card-label">Sensor Timeline</div>
+    <div class="card-label">Sensor Timeline · Data from CSE</div>
     <div class="chart-tabs" id="chart-tabs"></div>
     <div class="chart-wrap"><canvas id="sensorChart"></canvas></div>
   </div>
 
-  <!-- CSE History -->
+  <!-- History -->
   <div class="card history-card">
     <div class="card-label">CSE History · Last ContentInstances</div>
     <div class="history-wrap">
       <table class="history-table">
-        <thead><tr><th>TIME</th><th>BATTERY</th><th>STEPS</th><th>LIGHT</th><th>ACCEL X</th><th>SOURCE</th></tr></thead>
+        <thead><tr><th>TIME</th><th>BATTERY</th><th>STEPS</th><th>LIGHT</th><th>ACCEL X</th><th>TRANSPORT</th></tr></thead>
         <tbody id="history-body"></tbody>
       </table>
     </div>
@@ -218,7 +210,6 @@
 </main>
 
 <script>
-// ── Sensor metadata ───────────────────────────────────────────────────────────
 const SENSOR_META = {
   accel_x:{label:'Accel X',unit:'m/s²'},accel_y:{label:'Accel Y',unit:'m/s²'},accel_z:{label:'Accel Z',unit:'m/s²'},
   light_lux:{label:'Light',unit:'lux'},proximity_cm:{label:'Proximity',unit:'cm'},
@@ -227,18 +218,15 @@ const SENSOR_META = {
   battery_pct:{label:'Battery',unit:'%'},pressure_hpa:{label:'Pressure',unit:'hPa'},
   temp_c:{label:'Temperature',unit:'°C'},humidity_pct:{label:'Humidity',unit:'%'},
 };
-const SKIP = ['timestamp_ms','_received_at','battery_charging','_source',
+const SKIP = ['timestamp_ms','_received_at','battery_charging','_source','_transport',
               'rot_x','rot_y','rot_z','grav_x','grav_y','grav_z',
               'gyro_x','gyro_y','gyro_z','mag_x','mag_y','mag_z'];
-
-// Chartable sensors (numeric, interesting over time)
 const CHARTABLE = ['accel_x','accel_y','accel_z','light_lux','battery_pct','step_count','proximity_cm'];
 const CHART_COLORS = {
   accel_x:'#00E5FF',accel_y:'#7B61FF',accel_z:'#00C853',
   light_lux:'#FFB300',battery_pct:'#FF3D3D',step_count:'#00E5FF',proximity_cm:'#7B61FF'
 };
 
-// ── Log ───────────────────────────────────────────────────────────────────────
 function addLog(msg, type='inf') {
   const log = document.getElementById('log');
   const ts = new Date().toTimeString().slice(0,8);
@@ -250,26 +238,34 @@ function addLog(msg, type='inf') {
   if (log.children.length > 300) log.removeChild(log.firstChild);
 }
 
-// ── Status ────────────────────────────────────────────────────────────────────
-function updateStatus(data) {
-  const ble = data.ble || '', cse = data.cse || '', sub = data.sub || '';
-  document.getElementById('ble-status').textContent = `BLE: ${ble}`;
-  document.getElementById('cse-status').textContent = `CSE: ${cse}`;
-  document.getElementById('sub-status').textContent = `SUB: ${sub}`;
-  document.getElementById('stat-posts').textContent = data.posts || 0;
-  if (data.last_post) document.getElementById('stat-time').textContent = data.last_post;
-
-  document.getElementById('ble-dot').className = 'dot ' +
-    (ble.includes('connected') ? 'ok' : ble.includes('scanning') ? 'warn' : 'error');
-  document.getElementById('cse-dot').className = 'dot ' +
-    (cse.startsWith('OK') ? 'ok' : cse === 'idle' ? '' : 'error');
-  document.getElementById('sub-dot').className = 'dot ' +
-    (sub === 'active' ? 'ok' : sub === 'none' ? '' : 'error');
-
-  if (ble.includes('connected')) document.getElementById('stat-device').textContent = ble;
+function transportClass(t) {
+  if (!t) return '';
+  if (t.toLowerCase().includes('ble')) return 'src-ble';
+  if (t.toLowerCase().includes('wifi') || t.toLowerCase().includes('http')) return 'src-wifi';
+  return 'src-cse';
 }
 
-// ── Sensor cards ──────────────────────────────────────────────────────────────
+function updateStatus(data) {
+  const cse = data.cse || '', sub = data.sub || '', transport = data.transport || '-';
+  document.getElementById('cse-status').textContent = `CSE: ${cse}`;
+  document.getElementById('sub-status').textContent = `SUB: ${sub}`;
+  document.getElementById('transport-status').textContent = `TRANSPORT: ${transport}`;
+  document.getElementById('stat-receptions').textContent = data.receptions || 0;
+  if (data.last_reception) document.getElementById('stat-time').textContent = data.last_reception;
+  if (data.transport && data.transport !== '-') {
+    document.getElementById('stat-transport').textContent = data.transport;
+    const tClass = transportClass(data.transport);
+    document.getElementById('stat-transport').style.color =
+      tClass === 'src-ble' ? 'var(--ble)' : tClass === 'src-wifi' ? 'var(--wifi)' : 'var(--accent)';
+  }
+  document.getElementById('cse-dot').className = 'dot ' +
+    (cse === 'receiving' ? 'ok' : cse === 'idle' ? '' : 'warn');
+  document.getElementById('sub-dot').className = 'dot ' +
+    (sub === 'active' ? 'ok' : sub === 'none' ? '' : 'error');
+  document.getElementById('transport-dot').className = 'dot ' +
+    (transport !== '-' ? 'ok' : '');
+}
+
 function updateSensors(data) {
   const grid = document.getElementById('sensor-grid');
   Object.entries(data).forEach(([key, val]) => {
@@ -281,7 +277,7 @@ function updateSensors(data) {
       card = document.createElement('div');
       card.className = 'sensor-card'; card.id = id;
       card.innerHTML = `<div class="sensor-name">${meta.label.toUpperCase()}</div>
-        <div class="sensor-value" id="sv-${key}">—</div>
+        <div class="sensor-value" id="sv-${key}">-</div>
         <div class="sensor-unit">${meta.unit}</div>`;
       grid.appendChild(card);
     }
@@ -294,13 +290,11 @@ function updateSensors(data) {
   if (placeholder) placeholder.remove();
   if (data.timestamp_ms)
     document.getElementById('stat-time').textContent = new Date(data.timestamp_ms).toTimeString().slice(0,8);
-  addLog(`Data · batt=${data.battery_pct}% steps=${data.step_count??'—'} src=${data._source??'ble'}`,
-    data._source === 'cse-push' ? 'ble' : 'ok');
 }
 
-// ── Chart ─────────────────────────────────────────────────────────────────────
+// Chart
 let chart, activeKey = 'accel_x';
-const chartData = {};  // key -> {labels, values}
+const chartData = {};
 CHARTABLE.forEach(k => { chartData[k] = {labels:[], values:[]}; });
 
 function initChart() {
@@ -312,19 +306,14 @@ function initChart() {
     data: {
       labels: [],
       datasets: [{
-        label: activeKey,
-        data: [],
+        label: activeKey, data: [],
         borderColor: CHART_COLORS[activeKey],
         backgroundColor: CHART_COLORS[activeKey] + '15',
-        borderWidth: 1.5,
-        pointRadius: 0,
-        fill: true,
-        tension: 0.3
+        borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3
       }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      animation: false,
+      responsive: true, maintainAspectRatio: false, animation: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: '#1E2D40' }, ticks: { maxTicksLimit: 8, font: { family: 'Share Tech Mono', size: 9 } } },
@@ -332,8 +321,6 @@ function initChart() {
       }
     }
   });
-
-  // Tabs
   const tabs = document.getElementById('chart-tabs');
   CHARTABLE.forEach(k => {
     if (!SENSOR_META[k]) return;
@@ -346,7 +333,6 @@ function initChart() {
       btn.classList.add('active');
       chart.data.datasets[0].borderColor = CHART_COLORS[k];
       chart.data.datasets[0].backgroundColor = CHART_COLORS[k] + '15';
-      chart.data.datasets[0].label = k;
       refreshChart();
     };
     tabs.appendChild(btn);
@@ -354,9 +340,8 @@ function initChart() {
 }
 
 function refreshChart() {
-  const d = chartData[activeKey];
-  chart.data.labels = d.labels.slice(-40);
-  chart.data.datasets[0].data = d.values.slice(-40);
+  chart.data.labels = chartData[activeKey].labels.slice(-40);
+  chart.data.datasets[0].data = chartData[activeKey].values.slice(-40);
   chart.update('none');
 }
 
@@ -366,75 +351,55 @@ function pushChartPoint(data) {
     if (data[k] !== undefined) {
       chartData[k].labels.push(ts);
       chartData[k].values.push(data[k]);
-      if (chartData[k].labels.length > 60) {
-        chartData[k].labels.shift(); chartData[k].values.shift();
-      }
+      if (chartData[k].labels.length > 60) { chartData[k].labels.shift(); chartData[k].values.shift(); }
     }
   });
   refreshChart();
 }
 
-function loadHistory(hist) {
-  if (!hist || !hist.length) return;
-  hist.forEach(entry => {
-    const d = entry.data || entry;
-    const ts = entry.ts ? new Date(entry.ts * 1000).toTimeString().slice(0,8) : '—';
-    CHARTABLE.forEach(k => {
-      if (d[k] !== undefined) {
-        chartData[k].labels.push(ts);
-        chartData[k].values.push(d[k]);
-      }
-    });
-  });
-  refreshChart();
-}
-
-// ── History table ─────────────────────────────────────────────────────────────
 function updateHistoryTable(entries) {
   const tbody = document.getElementById('history-body');
   tbody.innerHTML = '';
-  const rows = [...entries].reverse().slice(0, 15);
-  rows.forEach(entry => {
+  [...entries].reverse().slice(0,15).forEach(entry => {
     const d = entry.data || entry;
-    const ts = entry.ts ? new Date(entry.ts * 1000).toTimeString().slice(0,8) : '—';
-    const src = d._source || 'ble';
+    const ts = entry.ts ? new Date(entry.ts * 1000).toTimeString().slice(0,8) : '-';
+    const transport = d._transport || d._source || 'BLE';
+    const tClass = transportClass(transport);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${ts}</td>
-      <td>${d.battery_pct ?? '—'}%</td>
-      <td>${d.step_count ?? '—'}</td>
-      <td>${d.light_lux !== undefined ? d.light_lux.toFixed(1) : '—'} lux</td>
-      <td>${d.accel_x !== undefined ? d.accel_x.toFixed(3) : '—'}</td>
-      <td class="src-${src === 'cse-push' ? 'cse' : 'ble'}">${src}</td>`;
+      <td>${d.battery_pct ?? '-'}%</td>
+      <td>${d.step_count ?? '-'}</td>
+      <td>${d.light_lux !== undefined ? d.light_lux.toFixed(1) : '-'} lux</td>
+      <td>${d.accel_x !== undefined ? d.accel_x.toFixed(3) : '-'}</td>
+      <td class="${tClass}">${transport}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-// ── WebSocket ─────────────────────────────────────────────────────────────────
+// WebSocket
 let ws, reconnectTimer;
-
 function connect() {
   ws = new WebSocket(`ws://${location.host}/ws`);
   ws.onopen = () => {
     document.getElementById('ws-status').textContent = 'WS: connected';
     document.getElementById('overlay').classList.add('hidden');
-    addLog('WebSocket connected', 'inf');
+    addLog('Connected to Dashboard AE', 'inf');
     clearTimeout(reconnectTimer);
-    // Fetch CSE history
     fetch('/api/history').then(r => r.json()).then(d => {
-      if (d.local && d.local.length) { loadHistory(d.local); updateHistoryTable(d.local); }
+      if (d.local && d.local.length) updateHistoryTable(d.local);
     }).catch(() => {});
   };
   ws.onmessage = e => {
     const msg = JSON.parse(e.data);
     if (msg.type === 'status')  updateStatus(msg.data);
     if (msg.type === 'sensors') { updateSensors(msg.data); pushChartPoint(msg.data); }
-    if (msg.type === 'history') { updateHistoryTable(msg.data); }
-    if (msg.type === 'log')     { addLog(msg.msg, msg.level || 'inf'); }
+    if (msg.type === 'history') updateHistoryTable(msg.data);
+    if (msg.type === 'log')     addLog(msg.msg, msg.level || 'inf');
   };
   ws.onclose = () => {
     document.getElementById('ws-status').textContent = 'WS: reconnecting…';
-    addLog('WebSocket disconnected — reconnecting…', 'err');
+    addLog('Disconnected - reconnecting…', 'err');
     reconnectTimer = setTimeout(connect, 3000);
   };
   ws.onerror = () => ws.close();
