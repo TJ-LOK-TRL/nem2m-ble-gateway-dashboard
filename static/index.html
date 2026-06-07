@@ -41,7 +41,6 @@
     background:linear-gradient(90deg,var(--accent),transparent);}
   .card.ble-color::before{background:linear-gradient(90deg,var(--ble),transparent);}
   .card.success-color::before{background:linear-gradient(90deg,var(--success),transparent);}
-  .card.warn-color::before{background:linear-gradient(90deg,var(--warn),transparent);}
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
   .card-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);
     letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
@@ -54,31 +53,33 @@
   .sensor-unit{font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
   .stat-value{font-family:'Share Tech Mono',monospace;font-size:32px;color:var(--accent);line-height:1;margin-bottom:4px;}
   .stat-label{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
+  /* Sensor selector */
+  .sensor-selector{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .sensor-selector .label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+  .sensor-btn{padding:5px 16px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:10px;
+    border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+  .sensor-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,0.08);}
+  .sensor-btn .transport-dot{display:inline-block;width:6px;height:6px;border-radius:50%;
+    margin-right:5px;background:var(--muted);}
+  .sensor-btn .transport-dot.ble{background:var(--ble);}
+  .sensor-btn .transport-dot.wifi{background:var(--wifi);}
+  /* Chart */
   .chart-card{grid-column:1/-1;}
   .chart-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
   .chart-tab{padding:5px 14px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:10px;
     border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;}
   .chart-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,0.08);}
   .chart-wrap{position:relative;height:200px;}
+  /* History */
   .history-card{grid-column:1/-1;}
   .history-table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:11px;}
   .history-table th{text-align:left;padding:6px 10px;color:var(--muted);border-bottom:1px solid var(--border);font-size:9px;letter-spacing:1.5px;}
   .history-table td{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--text);}
   .history-table tr:hover td{background:var(--s2);}
   .history-wrap{max-height:180px;overflow-y:auto;}
-  .src-ble{color:var(--ble);}
-  .src-wifi{color:var(--wifi);}
-  .src-cse{color:var(--success);}
-  .log-card{grid-column:1/-1;}
-  .log-container{background:var(--bg);border:1px solid var(--border);border-radius:4px;
-    height:120px;overflow-y:auto;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;}
-  .log-line{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);animation:fadeIn 0.2s ease;}
-  .log-line .ts{color:var(--muted);margin-right:10px;}
-  .log-line .ok{color:var(--success);}
-  .log-line .err{color:var(--danger);}
-  .log-line .inf{color:var(--accent);}
-  .log-line .ble{color:var(--ble);}
-  .log-line .warn{color:var(--warn);}
+  .t-ble{color:var(--ble);}
+  .t-wifi{color:var(--wifi);}
+  /* Architecture */
   .arch-card{grid-column:1/-1;}
   .arch{display:flex;align-items:center;justify-content:center;gap:0;padding:12px 0 6px;flex-wrap:wrap;}
   .arch-node{text-align:center;padding:10px 18px;border:1px solid var(--border);border-radius:6px;
@@ -90,9 +91,19 @@
   .arch-node.wifi-node .n-name{color:var(--wifi);}
   .arch-node.dash-node .n-name{color:var(--warn);}
   .arch-arrow{padding:0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;}
-  .arch-arrow .proto{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+  .arch-arrow .proto{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);}
   .arch-arrow .line{width:50px;height:1px;background:linear-gradient(90deg,var(--ble),var(--accent));position:relative;}
-  .arch-arrow .line::after{content:'▶';position:absolute;right:-6px;top:-7px;font-size:8px;color:var(--accent);}
+  .arch-arrow .line::after{content:'>';position:absolute;right:-6px;top:-7px;font-size:8px;color:var(--accent);}
+  /* Log */
+  .log-card{grid-column:1/-1;}
+  .log-container{background:var(--bg);border:1px solid var(--border);border-radius:4px;
+    height:120px;overflow-y:auto;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;}
+  .log-line{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+  .log-line .ts{color:var(--muted);margin-right:10px;}
+  .log-line .ok{color:var(--success);}
+  .log-line .err{color:var(--danger);}
+  .log-line .inf{color:var(--accent);}
+  .log-line .ble{color:var(--ble);}
   ::-webkit-scrollbar{width:4px;}
   ::-webkit-scrollbar-track{background:var(--bg);}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
@@ -109,18 +120,18 @@
 
 <div id="overlay">
   <div class="spinner"></div>
-  <div class="overlay-text">CONNECTING TO CSE…</div>
+  <div class="overlay-text">CONNECTING TO CSE...</div>
 </div>
 
 <header>
   <div>
-    <div class="logo">one<span>M2M</span> · SENSOR DASHBOARD</div>
-    <div class="header-sub mono">Consumer AE · Subscribes to CSE · Physical-Layer Agnostic IoT</div>
+    <div class="logo">one<span>M2M</span> - SENSOR DASHBOARD</div>
+    <div class="header-sub mono">Consumer AE - Subscribes to CSE - Physical-Layer Agnostic IoT</div>
   </div>
   <div class="header-right">
-    <div class="badge"><div class="dot" id="cse-dot"></div><span id="cse-status" class="mono">CSE: -</span></div>
-    <div class="badge"><div class="dot" id="sub-dot"></div><span id="sub-status" class="mono">SUB: -</span></div>
-    <div class="badge"><div class="dot" id="transport-dot"></div><span id="transport-status" class="mono">TRANSPORT: -</span></div>
+    <div class="badge"><div class="dot" id="sub-ae-dot"></div><span id="sub-ae-status" class="mono">SUB AE: -</span></div>
+    <div class="badge"><div class="dot" id="sub-cnt-dot"></div><span id="sub-cnt-status" class="mono">CONTAINERS: 0</span></div>
+    <div class="badge"><div class="dot" id="sensors-dot"></div><span id="sensors-status" class="mono">SENSORS: 0</span></div>
     <div class="badge"><div class="dot ok"></div><span class="mono" id="ws-status">WS: connected</span></div>
   </div>
 </header>
@@ -128,28 +139,27 @@
 <main>
   <!-- Architecture -->
   <div class="card arch-card">
-    <div class="card-label">System Architecture · oneM2M Physical-Layer Agnosticism</div>
+    <div class="card-label">System Architecture - oneM2M Physical-Layer Agnosticism</div>
     <div class="arch">
-      <div class="arch-node ble-node">
-        <div class="n-label">Field Device · BLE AE</div>
-        <div class="n-name">Android BLE</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="arch-node ble-node">
+          <div class="n-label">Field Device N - BLE</div>
+          <div class="n-name">Sensor BLE</div>
+        </div>
+        <div class="arch-node wifi-node">
+          <div class="n-label">Direct AE - WiFi</div>
+          <div class="n-name">Android WiFi</div>
+        </div>
       </div>
-      <div class="arch-arrow"><div class="proto">BLE GATT</div><div class="line"></div></div>
+      <div class="arch-arrow"><div class="proto">BLE/WiFi</div><div class="line"></div></div>
       <div class="arch-node active">
         <div class="n-label">Interworking Proxy AE</div>
         <div class="n-name">gateway.py</div>
       </div>
       <div class="arch-arrow"><div class="proto">Mca / HTTP</div><div class="line"></div></div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
-        <div class="arch-node active">
-          <div class="n-label">IN-CSE · ACME</div>
-          <div class="n-name">oneM2M CSE</div>
-        </div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted)">↑ Mca / HTTP (WiFi mode)</div>
-        <div class="arch-node wifi-node">
-          <div class="n-label">Direct AE · WiFi</div>
-          <div class="n-name">Android WiFi</div>
-        </div>
+      <div class="arch-node active">
+        <div class="n-label">IN-CSE - ACME</div>
+        <div class="n-name">oneM2M CSE</div>
       </div>
       <div class="arch-arrow"><div class="proto">m2m:sub notify</div><div class="line"></div></div>
       <div class="arch-node dash-node">
@@ -161,7 +171,7 @@
 
   <!-- Stats -->
   <div class="card success-color">
-    <div class="card-label">Notifications Received</div>
+    <div class="card-label">Total Notifications</div>
     <div class="stat-value" id="stat-receptions">0</div>
     <div class="stat-label">from CSE subscription</div>
   </div>
@@ -171,32 +181,37 @@
     <div class="stat-label">timestamp</div>
   </div>
   <div class="card ble-color">
-    <div class="card-label">Last Transport</div>
-    <div class="stat-value" style="font-size:18px;color:var(--ble)" id="stat-transport">-</div>
-    <div class="stat-label">physical layer used</div>
+    <div class="card-label">Active Sensors</div>
+    <div class="stat-value" style="font-size:32px;color:var(--ble)" id="stat-sensors">0</div>
+    <div class="stat-label">connected devices</div>
   </div>
 
-  <!-- Sensor grid -->
+  <!-- Sensor selector -->
+  <div class="sensor-selector" id="sensor-selector" style="display:none">
+    <span class="label">SENSOR:</span>
+  </div>
+
+  <!-- Sensor data grid -->
   <div class="sensor-grid" id="sensor-grid">
     <div class="sensor-card">
-      <div class="sensor-name">Waiting for CSE notifications…</div>
+      <div class="sensor-name">Waiting for CSE notifications...</div>
       <div class="sensor-value" style="color:var(--muted)">-</div>
     </div>
   </div>
 
-  <!-- Charts -->
+  <!-- Chart -->
   <div class="card chart-card">
-    <div class="card-label">Sensor Timeline · Data from CSE</div>
+    <div class="card-label">Sensor Timeline - Data from CSE</div>
     <div class="chart-tabs" id="chart-tabs"></div>
     <div class="chart-wrap"><canvas id="sensorChart"></canvas></div>
   </div>
 
   <!-- History -->
   <div class="card history-card">
-    <div class="card-label">CSE History · Last ContentInstances</div>
+    <div class="card-label">CSE History - Last ContentInstances</div>
     <div class="history-wrap">
       <table class="history-table">
-        <thead><tr><th>TIME</th><th>BATTERY</th><th>STEPS</th><th>LIGHT</th><th>ACCEL X</th><th>TRANSPORT</th></tr></thead>
+        <thead><tr><th>TIME</th><th>SENSOR</th><th>BATTERY</th><th>LIGHT</th><th>ACCEL X</th><th>TRANSPORT</th></tr></thead>
         <tbody id="history-body"></tbody>
       </table>
     </div>
@@ -211,22 +226,36 @@
 
 <script>
 const SENSOR_META = {
-  accel_x:{label:'Accel X',unit:'m/s²'},accel_y:{label:'Accel Y',unit:'m/s²'},accel_z:{label:'Accel Z',unit:'m/s²'},
+  accel_x:{label:'Accel X',unit:'m/s2'},accel_y:{label:'Accel Y',unit:'m/s2'},accel_z:{label:'Accel Z',unit:'m/s2'},
   light_lux:{label:'Light',unit:'lux'},proximity_cm:{label:'Proximity',unit:'cm'},
-  step_count:{label:'Steps',unit:'steps'},gps_lat:{label:'GPS Lat',unit:'°'},
-  gps_lon:{label:'GPS Lon',unit:'°'},gps_alt:{label:'GPS Alt',unit:'m'},
-  battery_pct:{label:'Battery',unit:'%'},pressure_hpa:{label:'Pressure',unit:'hPa'},
-  temp_c:{label:'Temperature',unit:'°C'},humidity_pct:{label:'Humidity',unit:'%'},
+  step_count:{label:'Steps',unit:'steps'},gps_lat:{label:'GPS Lat',unit:'deg'},
+  gps_lon:{label:'GPS Lon',unit:'deg'},gps_alt:{label:'GPS Alt',unit:'m'},
+  battery_pct:{label:'Battery',unit:'%'},
 };
-const SKIP = ['timestamp_ms','_received_at','battery_charging','_source','_transport',
-              'rot_x','rot_y','rot_z','grav_x','grav_y','grav_z',
-              'gyro_x','gyro_y','gyro_z','mag_x','mag_y','mag_z'];
+const SKIP = ['timestamp_ms','_received_at','battery_charging','_source','_transport','_device',
+              'rot_x','rot_y','rot_z','grav_x','grav_y','grav_z','gyro_x','gyro_y','gyro_z',
+              'mag_x','mag_y','mag_z'];
 const CHARTABLE = ['accel_x','accel_y','accel_z','light_lux','battery_pct','step_count','proximity_cm'];
 const CHART_COLORS = {
   accel_x:'#00E5FF',accel_y:'#7B61FF',accel_z:'#00C853',
   light_lux:'#FFB300',battery_pct:'#FF3D3D',step_count:'#00E5FF',proximity_cm:'#7B61FF'
 };
 
+// State
+let activeSensor = null;
+const sensorData = {}; // device -> {latest, history, chartData}
+const allHistory = []; // global history for table
+
+function getSensorState(device) {
+  if (!sensorData[device]) {
+    const chartData = {};
+    CHARTABLE.forEach(k => { chartData[k] = {labels:[], values:[]}; });
+    sensorData[device] = {latest:{}, history:[], chartData};
+  }
+  return sensorData[device];
+}
+
+// Log
 function addLog(msg, type='inf') {
   const log = document.getElementById('log');
   const ts = new Date().toTimeString().slice(0,8);
@@ -238,36 +267,60 @@ function addLog(msg, type='inf') {
   if (log.children.length > 300) log.removeChild(log.firstChild);
 }
 
+// Transport helpers
 function transportClass(t) {
   if (!t) return '';
-  if (t.toLowerCase().includes('ble')) return 'src-ble';
-  if (t.toLowerCase().includes('wifi') || t.toLowerCase().includes('http')) return 'src-wifi';
-  return 'src-cse';
+  if (t.toLowerCase().includes('ble')) return 't-ble';
+  if (t.toLowerCase().includes('wifi') || t.toLowerCase().includes('http')) return 't-wifi';
+  return '';
 }
 
+// Status
 function updateStatus(data) {
-  const cse = data.cse || '', sub = data.sub || '', transport = data.transport || '-';
-  document.getElementById('cse-status').textContent = `CSE: ${cse}`;
-  document.getElementById('sub-status').textContent = `SUB: ${sub}`;
-  document.getElementById('transport-status').textContent = `TRANSPORT: ${transport}`;
+  const subAe = data.sub_ae || '-';
+  const subCnt = data.sub_containers || 0;
+  const count = data.active_sensors || 0;
+  document.getElementById('sub-ae-status').textContent = `SUB AE: ${subAe}`;
+  document.getElementById('sub-cnt-status').textContent = `CONTAINERS: ${subCnt}`;
+  document.getElementById('sensors-status').textContent = `SENSORS: ${count}`;
   document.getElementById('stat-receptions').textContent = data.receptions || 0;
   if (data.last_reception) document.getElementById('stat-time').textContent = data.last_reception;
-  if (data.transport && data.transport !== '-') {
-    document.getElementById('stat-transport').textContent = data.transport;
-    const tClass = transportClass(data.transport);
-    document.getElementById('stat-transport').style.color =
-      tClass === 'src-ble' ? 'var(--ble)' : tClass === 'src-wifi' ? 'var(--wifi)' : 'var(--accent)';
-  }
-  document.getElementById('cse-dot').className = 'dot ' +
-    (cse === 'receiving' ? 'ok' : cse === 'idle' ? '' : 'warn');
-  document.getElementById('sub-dot').className = 'dot ' +
-    (sub === 'active' ? 'ok' : sub === 'none' ? '' : 'error');
-  document.getElementById('transport-dot').className = 'dot ' +
-    (transport !== '-' ? 'ok' : '');
+  document.getElementById('stat-sensors').textContent = count;
+  document.getElementById('sub-ae-dot').className = 'dot ' + (subAe === 'active' ? 'ok' : subAe === 'none' || subAe === '-' ? '' : 'error');
+  document.getElementById('sub-cnt-dot').className = 'dot ' + (subCnt > 0 ? 'ok' : '');
+  document.getElementById('sensors-dot').className = 'dot ' + (count > 0 ? 'ok' : '');
 }
 
-function updateSensors(data) {
+// Sensor selector
+function updateSensorSelector() {
+  const devices = Object.keys(sensorData);
+  const selector = document.getElementById('sensor-selector');
+  if (devices.length <= 1) { selector.style.display = 'none'; return; }
+  selector.style.display = 'flex';
+
+  // Keep label, rebuild buttons
+  const label = selector.querySelector('.label');
+  selector.innerHTML = '';
+  selector.appendChild(label);
+
+  devices.forEach(device => {
+    const s = sensorData[device];
+    const transport = s.latest._transport || '';
+    const tClass = transport.toLowerCase().includes('ble') ? 'ble' : 'wifi';
+    const btn = document.createElement('button');
+    btn.className = 'sensor-btn' + (device === activeSensor ? ' active' : '');
+    btn.innerHTML = `<span class="transport-dot ${tClass}"></span>${device}`;
+    btn.onclick = () => { activeSensor = device; updateSensorSelector(); renderActiveSensor(); };
+    selector.appendChild(btn);
+  });
+}
+
+// Sensor grid
+function renderActiveSensor() {
+  if (!activeSensor || !sensorData[activeSensor]) return;
+  const data = sensorData[activeSensor].latest;
   const grid = document.getElementById('sensor-grid');
+
   Object.entries(data).forEach(([key, val]) => {
     if (SKIP.includes(key) || !SENSOR_META[key]) return;
     const meta = SENSOR_META[key];
@@ -286,16 +339,57 @@ function updateSensors(data) {
     card.classList.add('updated');
     setTimeout(() => card.classList.remove('updated'), 800);
   });
+
   const placeholder = grid.querySelector('.sensor-card:not([id])');
   if (placeholder) placeholder.remove();
-  if (data.timestamp_ms)
-    document.getElementById('stat-time').textContent = new Date(data.timestamp_ms).toTimeString().slice(0,8);
+}
+
+// Receive sensor data
+function receiveSensorData(data, device) {
+  const state = getSensorState(device);
+  state.latest = data;
+  state.history.push({ts: Date.now()/1000, data});
+  if (state.history.length > 60) state.history.shift();
+
+  // Set active sensor if none
+  if (!activeSensor) activeSensor = device;
+
+  updateSensorSelector();
+
+  if (device === activeSensor) {
+    renderActiveSensor();
+    pushChartPoint(data, device);
+  }
+
+  // Global history
+  allHistory.push({ts: Date.now()/1000, data, device});
+  if (allHistory.length > 100) allHistory.shift();
+  updateHistoryTable();
+}
+
+// History table
+function updateHistoryTable() {
+  const tbody = document.getElementById('history-body');
+  tbody.innerHTML = '';
+  [...allHistory].reverse().slice(0,15).forEach(entry => {
+    const d = entry.data;
+    const ts = new Date(entry.ts * 1000).toTimeString().slice(0,8);
+    const transport = d._transport || '-';
+    const tClass = transportClass(transport);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${ts}</td>
+      <td style="color:var(--muted)">${entry.device}</td>
+      <td>${d.battery_pct ?? '-'}%</td>
+      <td>${d.light_lux !== undefined ? d.light_lux.toFixed(1) : '-'} lux</td>
+      <td>${d.accel_x !== undefined ? d.accel_x.toFixed(3) : '-'}</td>
+      <td class="${tClass}">${transport}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
 // Chart
 let chart, activeKey = 'accel_x';
-const chartData = {};
-CHARTABLE.forEach(k => { chartData[k] = {labels:[], values:[]}; });
 
 function initChart() {
   const ctx = document.getElementById('sensorChart').getContext('2d');
@@ -303,15 +397,12 @@ function initChart() {
   Chart.defaults.borderColor = '#1E2D40';
   chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: activeKey, data: [],
-        borderColor: CHART_COLORS[activeKey],
-        backgroundColor: CHART_COLORS[activeKey] + '15',
-        borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3
-      }]
-    },
+    data: { labels: [], datasets: [{
+      label: activeKey, data: [],
+      borderColor: CHART_COLORS[activeKey],
+      backgroundColor: CHART_COLORS[activeKey] + '15',
+      borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3
+    }]},
     options: {
       responsive: true, maintainAspectRatio: false, animation: false,
       plugins: { legend: { display: false } },
@@ -321,6 +412,7 @@ function initChart() {
       }
     }
   });
+
   const tabs = document.getElementById('chart-tabs');
   CHARTABLE.forEach(k => {
     if (!SENSOR_META[k]) return;
@@ -339,42 +431,29 @@ function initChart() {
   });
 }
 
-function refreshChart() {
-  chart.data.labels = chartData[activeKey].labels.slice(-40);
-  chart.data.datasets[0].data = chartData[activeKey].values.slice(-40);
-  chart.update('none');
-}
-
-function pushChartPoint(data) {
+function pushChartPoint(data, device) {
+  if (device !== activeSensor) return;
+  const state = getSensorState(device);
   const ts = new Date().toTimeString().slice(0,8);
   CHARTABLE.forEach(k => {
     if (data[k] !== undefined) {
-      chartData[k].labels.push(ts);
-      chartData[k].values.push(data[k]);
-      if (chartData[k].labels.length > 60) { chartData[k].labels.shift(); chartData[k].values.shift(); }
+      state.chartData[k].labels.push(ts);
+      state.chartData[k].values.push(data[k]);
+      if (state.chartData[k].labels.length > 60) {
+        state.chartData[k].labels.shift();
+        state.chartData[k].values.shift();
+      }
     }
   });
   refreshChart();
 }
 
-function updateHistoryTable(entries) {
-  const tbody = document.getElementById('history-body');
-  tbody.innerHTML = '';
-  [...entries].reverse().slice(0,15).forEach(entry => {
-    const d = entry.data || entry;
-    const ts = entry.ts ? new Date(entry.ts * 1000).toTimeString().slice(0,8) : '-';
-    const transport = d._transport || d._source || 'BLE';
-    const tClass = transportClass(transport);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${ts}</td>
-      <td>${d.battery_pct ?? '-'}%</td>
-      <td>${d.step_count ?? '-'}</td>
-      <td>${d.light_lux !== undefined ? d.light_lux.toFixed(1) : '-'} lux</td>
-      <td>${d.accel_x !== undefined ? d.accel_x.toFixed(3) : '-'}</td>
-      <td class="${tClass}">${transport}</td>`;
-    tbody.appendChild(tr);
-  });
+function refreshChart() {
+  if (!activeSensor || !sensorData[activeSensor]) return;
+  const d = sensorData[activeSensor].chartData[activeKey];
+  chart.data.labels = d.labels.slice(-40);
+  chart.data.datasets[0].data = d.values.slice(-40);
+  chart.update('none');
 }
 
 // WebSocket
@@ -386,20 +465,28 @@ function connect() {
     document.getElementById('overlay').classList.add('hidden');
     addLog('Connected to Dashboard AE', 'inf');
     clearTimeout(reconnectTimer);
-    fetch('/api/history').then(r => r.json()).then(d => {
-      if (d.local && d.local.length) updateHistoryTable(d.local);
-    }).catch(() => {});
   };
   ws.onmessage = e => {
     const msg = JSON.parse(e.data);
     if (msg.type === 'status')  updateStatus(msg.data);
-    if (msg.type === 'sensors') { updateSensors(msg.data); pushChartPoint(msg.data); }
-    if (msg.type === 'history') updateHistoryTable(msg.data);
-    if (msg.type === 'log')     addLog(msg.msg, msg.level || 'inf');
+    if (msg.type === 'sensors') receiveSensorData(msg.data, msg.device);
+    if (msg.type === 'history') {
+      // Load history for a specific sensor
+      if (msg.data && msg.device) {
+        const state = getSensorState(msg.device);
+        msg.data.forEach(entry => {
+          allHistory.push({ts: entry.ts, data: entry.data, device: msg.device});
+        });
+        allHistory.sort((a,b) => a.ts - b.ts);
+        if (allHistory.length > 100) allHistory.splice(0, allHistory.length - 100);
+        updateHistoryTable();
+      }
+    }
+    if (msg.type === 'log') addLog(msg.msg, msg.level || 'inf');
   };
   ws.onclose = () => {
-    document.getElementById('ws-status').textContent = 'WS: reconnecting…';
-    addLog('Disconnected - reconnecting…', 'err');
+    document.getElementById('ws-status').textContent = 'WS: reconnecting...';
+    addLog('Disconnected - reconnecting...', 'err');
     reconnectTimer = setTimeout(connect, 3000);
   };
   ws.onerror = () => ws.close();

@@ -1,13 +1,15 @@
 """
-oneM2M Dashboard - Consumer AE
--------------------------------
-Independent AE that subscribes to the CSE and displays sensor data.
-This component has NO knowledge of the gateway or how data arrives at the CSE.
-It only knows the CSE - pure oneM2M consumer pattern.
+oneM2M Dashboard - Consumer AE (Multi-Sensor, Event-Driven)
+------------------------------------------------------------
+Independent Consumer AE implementing the full oneM2M subscription pattern:
 
-Architecture:
-    [ACME CSE] --m2m:sub notify--> [dashboard.py] --WebSocket--> [browser]
-    [ACME CSE] --HTTP GET--------> [dashboard.py] (history)
+1. Subscribes to the AE with chty=3 (Container creation notifications)
+2. When gateway creates a new sensor Container, CSE notifies dashboard
+3. Dashboard automatically creates a subscription on the new Container
+4. CSE notifies dashboard when new ContentInstances arrive in any Container
+5. On container discovery, fetches any data already present
+
+This is the correct oneM2M pattern for dynamic multi-sensor discovery.
 """
 
 import asyncio
@@ -22,37 +24,36 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-# ── Configuration ─────────────────────────────────────────────────────────────
-CSE_BASE         = "http://127.0.0.1:8080"
-CSE_ID           = "cse-in"
-AE_NAME          = "android-sensor"
-CONTAINER_NAME   = "sensorData"
-ORIGINATOR       = "CDashboard"
-NOTIFICATION_URL = "http://127.0.0.1:9000/notify"
-SUB_NAME         = "dashboard-sub"
+# -- Configuration -------------------------------------------------------------
+CSE_BASE          = "http://127.0.0.1:8080"
+CSE_ID            = "cse-in"
+AE_NAME           = "sensor-ae"
+ORIGINATOR        = "CDashboard"
+NOTIFICATION_URL  = "http://127.0.0.1:9000/notify"
+SUB_AE_NAME       = "ae-discovery-sub"
+SUB_DATA_PREFIX   = "data-sub"
+DASHBOARD_PORT    = 9000
+WATCHDOG_TIMEOUT  = 30
 
-DASHBOARD_PORT   = 9000
-
-# ── Logging ───────────────────────────────────────────────────────────────────
+# -- Logging -------------------------------------------------------------------
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("dashboard")
 
-# ── Shared state ──────────────────────────────────────────────────────────────
+# -- Shared state --------------------------------------------------------------
 connected_ws: Set[WebSocket] = set()
-latest_data: dict = {}
-history: list = []
-MAX_HISTORY = 60
+sensors: dict = {}
+subscribed_containers: set = set()
 last_reception_time = 0.0
 
 dashboard_status = {
-    "cse": "idle",
-    "sub": "none",
+    "sub_ae": "none",
+    "sub_containers": 0,
     "receptions": 0,
     "last_reception": None,
-    "transport": "-"
+    "active_sensors": 0
 }
 
-# ── oneM2M helpers ────────────────────────────────────────────────────────────
+# -- oneM2M helpers ------------------------------------------------------------
 def cse_headers(ty: int = None, ri: str = None) -> dict:
     h = {
         "X-M2M-Origin": ORIGINATOR,
@@ -65,57 +66,82 @@ def cse_headers(ty: int = None, ri: str = None) -> dict:
     return h
 
 def ensure_dashboard_ae():
-    """Register dashboard as a separate AE in the CSE."""
     r = requests.post(f"{CSE_BASE}/{CSE_ID}", timeout=5,
         headers=cse_headers(2),
-        json={"m2m:ae": {"rn": "dashboard-ae", "api": "N.onem2m.dashboard", "rr": True, "srv": ["3"]}})
-    log.info(f"Dashboard AE: {r.status_code}")
+        json={"m2m:ae": {"rn": "dashboard-ae", "api": "N.onem2m.dashboard",
+                         "rr": True, "srv": ["3"]}})
+    code = r.status_code
+    log.info(f"Dashboard AE: {'ready' if code in (201, 409, 403) else code}")
 
-def ensure_subscription():
-    """Create subscription on the sensor container - CSE will push to /notify."""
-    url = f"{CSE_BASE}/{CSE_ID}/{AE_NAME}/{CONTAINER_NAME}"
-    # Delete old sub
-    requests.delete(f"{url}/{SUB_NAME}",
-        headers=cse_headers(ri="del-sub"), timeout=5)
-    # Create new sub
+def subscribe_ae_for_container_discovery():
+    ae_url = f"{CSE_BASE}/{CSE_ID}/{AE_NAME}"
+    requests.delete(f"{ae_url}/{SUB_AE_NAME}",
+        headers=cse_headers(ri="del-ae-sub"), timeout=5)
+    r = requests.post(ae_url, timeout=15,
+        headers=cse_headers(23),
+        json={"m2m:sub": {
+            "rn": SUB_AE_NAME,
+            "nu": [NOTIFICATION_URL],
+            "nct": 1,
+            "enc": {"net": [3], "chty": [3]}
+        }})
+    ok = r.status_code in (200, 201)
+    log.info(f"AE discovery subscription: {r.status_code}")
+    dashboard_status["sub_ae"] = "active" if ok else f"failed {r.status_code}"
+    return ok
+
+def subscribe_container_for_data(container_name: str) -> bool:
+    if container_name in subscribed_containers:
+        return True
+    url = f"{CSE_BASE}/{CSE_ID}/{AE_NAME}/{container_name}"
+    sub_name = f"{SUB_DATA_PREFIX}-{container_name}"
+    requests.delete(f"{url}/{sub_name}",
+        headers=cse_headers(ri="del-data-sub"), timeout=5)
     r = requests.post(url, timeout=15,
         headers=cse_headers(23),
         json={"m2m:sub": {
-            "rn": SUB_NAME,
+            "rn": sub_name,
             "nu": [NOTIFICATION_URL],
             "nct": 1,
             "enc": {"net": [3]}
         }})
     ok = r.status_code in (200, 201)
-    log.info(f"Subscription: {r.status_code} {r.text[:80]}")
-    dashboard_status["sub"] = "active" if ok else f"failed {r.status_code}"
+    log.info(f"Container subscription [{container_name}]: {r.status_code}")
+    if ok:
+        subscribed_containers.add(container_name)
+        dashboard_status["sub_containers"] = len(subscribed_containers)
+    return ok
 
-def fetch_history_from_cse(limit: int = 20) -> list:
-    """Retrieve last N ContentInstances directly from CSE."""
-    url = f"{CSE_BASE}/{CSE_ID}/{AE_NAME}/{CONTAINER_NAME}"
+def fetch_existing_containers() -> list:
+    try:
+        r = requests.get(f"{CSE_BASE}/{CSE_ID}/{AE_NAME}",
+            params={"rcn": 6, "ty": 3},
+            headers=cse_headers(ri="list-cnt"), timeout=5)
+        if r.status_code == 200:
+            refs = r.json().get("m2m:rrl", {}).get("rrf", [])
+            return [ref["nm"] for ref in refs if ref.get("typ") == 3]
+    except Exception as e:
+        log.warning(f"Container list failed: {e}")
+    return []
+
+def fetch_latest_from_container(container_name: str) -> list:
+    """Fetch most recent ContentInstances already in a container."""
+    url = f"{CSE_BASE}/{CSE_ID}/{AE_NAME}/{container_name}"
     try:
         r = requests.get(url, timeout=5,
-            params={"rcn": 4, "ty": 4, "lim": limit},
-            headers=cse_headers(ri="hist-fetch"))
+            params={"rcn": 4, "ty": 4, "lim": 5},
+            headers=cse_headers(ri="fetch-latest"))
         if r.status_code == 200:
             data = r.json()
             cins = data.get("m2m:cnt", {}).get("m2m:cin", [])
             if isinstance(cins, dict):
                 cins = [cins]
-            result = []
-            for cin in cins:
-                try:
-                    con = cin.get("con", "{}")
-                    parsed = json.loads(con) if isinstance(con, str) else con
-                    result.append({"ts": cin.get("ct", ""), "data": parsed})
-                except Exception:
-                    pass
-            return result
+            return cins
     except Exception as e:
-        log.warning(f"History fetch failed: {e}")
+        log.warning(f"Fetch latest failed: {e}")
     return []
 
-# ── WebSocket broadcast ───────────────────────────────────────────────────────
+# -- WebSocket broadcast -------------------------------------------------------
 async def broadcast(message: dict):
     dead = set()
     for ws in connected_ws:
@@ -125,62 +151,112 @@ async def broadcast(message: dict):
             dead.add(ws)
     connected_ws.difference_update(dead)
 
-# ── Sensor data handler ───────────────────────────────────────────────────────
+# -- Notification handler ------------------------------------------------------
+async def handle_cin_received(cin: dict):
+    global last_reception_time
+    last_reception_time = time.time()
+
+    con = cin.get("con", "")
+    lbl = cin.get("lbl", [])
+
+    transport = "unknown"
+    device_name = "unknown"
+    for label in lbl:
+        if label.startswith("transport:"):
+            transport = label.split(":", 1)[1]
+        elif label.startswith("device:"):
+            device_name = label.split(":", 1)[1]
+
+    try:
+        parsed = json.loads(con) if isinstance(con, str) else con
+    except Exception:
+        return
+
+    parsed["_transport"] = transport
+    parsed["_device"] = device_name
+    parsed["_received_at"] = time.time()
+
+    if device_name not in sensors:
+        sensors[device_name] = {"latest": {}, "history": []}
+
+    sensors[device_name]["latest"] = parsed
+    sensors[device_name]["history"].append({"ts": time.time(), "data": parsed})
+    if len(sensors[device_name]["history"]) > 60:
+        sensors[device_name]["history"].pop(0)
+
+    dashboard_status["receptions"] += 1
+    dashboard_status["last_reception"] = time.strftime("%H:%M:%S")
+    dashboard_status["active_sensors"] = len(sensors)
+
+    await broadcast({"type": "sensors", "data": parsed, "device": device_name})
+    await broadcast({"type": "status", "data": dashboard_status})
+    await broadcast({"type": "history", "device": device_name,
+                     "data": sensors[device_name]["history"][-20:]})
+    await broadcast({"type": "log",
+                     "msg": f"[{device_name}] via {transport} - batt={parsed.get('battery_pct','?')}%",
+                     "level": "ok"})
+
+async def handle_container_created(rn: str):
+    log.info(f"New container discovered: {rn}")
+    loop = asyncio.get_event_loop()
+
+    # Subscribe to the new container
+    ok = await loop.run_in_executor(None, subscribe_container_for_data, rn)
+    if ok:
+        await broadcast({"type": "status", "data": dashboard_status})
+        await broadcast({"type": "log",
+                         "msg": f"New sensor discovered: {rn} - subscribed", "level": "ble"})
+
+        # Fetch any data already in the container
+        cins = await loop.run_in_executor(None, fetch_latest_from_container, rn)
+        for cin in cins:
+            await handle_cin_received(cin)
+
+# -- Watchdog ------------------------------------------------------------------
 async def watchdog():
-    """Reset status if no data received for 15 seconds."""
     global last_reception_time
     while True:
         await asyncio.sleep(5)
-        if last_reception_time > 0 and time.time() - last_reception_time > 30:
-            dashboard_status["cse"] = "idle"
-            dashboard_status["transport"] = "-"
+        if last_reception_time > 0 and time.time() - last_reception_time > WATCHDOG_TIMEOUT:
+            last_reception_time = 0.0
+            # Remove sensors that haven't sent data recently
+            now = time.time()
+            stale = [device for device, sdata in sensors.items()
+                     if sdata["history"] and now - sdata["history"][-1]["ts"] > WATCHDOG_TIMEOUT]
+            for device in stale:
+                del sensors[device]
+            dashboard_status["active_sensors"] = len(sensors)
             await broadcast({"type": "status", "data": dashboard_status})
 
-async def handle_notification(con: str, transport: str):
-    global latest_data, last_reception_time
-    last_reception_time = time.time()
-    try:
-        parsed = json.loads(con)
-        parsed["_received_at"] = time.time()
-        parsed["_transport"] = transport
-        latest_data = parsed
-
-        history.append({"ts": time.time(), "data": parsed})
-        if len(history) > MAX_HISTORY:
-            history.pop(0)
-
-        dashboard_status["cse"] = "receiving"
-        dashboard_status["receptions"] += 1
-        dashboard_status["last_reception"] = time.strftime("%H:%M:%S")
-        dashboard_status["transport"] = transport
-
-        await broadcast({"type": "sensors", "data": parsed})
-        await broadcast({"type": "status", "data": dashboard_status})
-        await broadcast({"type": "history", "data": history[-20:]})
-        await broadcast({"type": "log", "msg": f"Data via {transport} · batt={parsed.get('battery_pct','-')}%", "level": "ok"})
-
-    except Exception as e:
-        log.warning(f"Notification parse error: {e}")
-
-# ── FastAPI ───────────────────────────────────────────────────────────────────
+# -- FastAPI -------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
         ensure_dashboard_ae()
     except Exception as e:
-        log.warning(f"AE registration failed: {e}")
-    asyncio.create_task(delayed_subscription())
+        log.warning(f"AE failed: {e}")
+    asyncio.create_task(delayed_setup())
     asyncio.create_task(watchdog())
     yield
 
-async def delayed_subscription():
+async def delayed_setup():
     await asyncio.sleep(3)
-    try:
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, ensure_subscription)
-        await broadcast({"type": "status", "data": dashboard_status})
-    except Exception as e:
-        log.warning(f"Subscription failed: {e}")
+    loop = asyncio.get_event_loop()
+
+    # Step 1: AE-level subscription for future container discovery
+    await loop.run_in_executor(None, subscribe_ae_for_container_discovery)
+    await broadcast({"type": "status", "data": dashboard_status})
+
+    # Step 2: Subscribe to existing containers and fetch their latest data
+    containers = await loop.run_in_executor(None, fetch_existing_containers)
+    log.info(f"Existing containers: {containers}")
+    for container in containers:
+        ok = await loop.run_in_executor(None, subscribe_container_for_data, container)
+        if ok:
+            cins = await loop.run_in_executor(None, fetch_latest_from_container, container)
+            for cin in cins:
+                await handle_cin_received(cin)
+    await broadcast({"type": "status", "data": dashboard_status})
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -189,38 +265,35 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def index():
     return FileResponse("static/index.html")
 
-@app.get("/api/history")
-async def get_history():
-    cse_hist = fetch_history_from_cse(20)
-    return {"local": history[-20:], "cse": cse_hist}
+@app.get("/api/sensors")
+async def get_sensors():
+    return {"sensors": {k: v["latest"] for k, v in sensors.items()},
+            "status": dashboard_status}
 
-@app.get("/api/status")
-async def get_status():
-    return dashboard_status
-
-# oneM2M Subscription notification endpoint - CSE calls this
 @app.post("/notify")
 async def receive_notification(request: Request):
     try:
         body = await request.json()
-        log.info("CSE push notification received")
-
         sgn = body.get("m2m:sgn", {})
+
+        if sgn.get("vrq"):
+            log.info("CSE verification - acknowledged")
+            return JSONResponse(content={"m2m:rsp": {"rsc": 2000}}, status_code=200)
+
         nev = sgn.get("nev", {})
         rep = nev.get("rep", {})
-        cin = rep.get("m2m:cin", {})
-        con = cin.get("con", "")
 
-        # Extract transport from labels
-        lbl = cin.get("lbl", [])
-        transport = "unknown"
-        for label in lbl:
-            if label.startswith("transport:"):
-                transport = label.split(":", 1)[1]
-                break
+        # Container created in AE
+        cnt = rep.get("m2m:cnt")
+        if cnt:
+            rn = cnt.get("rn", "")
+            if rn:
+                asyncio.create_task(handle_container_created(rn))
 
-        if con:
-            await handle_notification(con, transport)
+        # ContentInstance created in Container
+        cin = rep.get("m2m:cin")
+        if cin:
+            asyncio.create_task(handle_cin_received(cin))
 
     except Exception as e:
         log.warning(f"Notification error: {e}")
@@ -232,10 +305,12 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     connected_ws.add(websocket)
     await websocket.send_json({"type": "status", "data": dashboard_status})
-    if latest_data:
-        await websocket.send_json({"type": "sensors", "data": latest_data})
-    if history:
-        await websocket.send_json({"type": "history", "data": history[-20:]})
+    for device, sdata in sensors.items():
+        if sdata["latest"]:
+            await websocket.send_json({"type": "sensors", "data": sdata["latest"], "device": device})
+        if sdata["history"]:
+            await websocket.send_json({"type": "history", "device": device,
+                                       "data": sdata["history"][-20:]})
     try:
         while True:
             await websocket.receive_text()
