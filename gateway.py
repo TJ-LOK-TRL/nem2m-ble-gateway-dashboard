@@ -28,7 +28,7 @@ from bleak import BleakClient, BleakScanner
 BLE_DEVICE_NAMES = ["OneM2M-Sensor"]
 BLE_CHAR_UUID    = "12345678-1234-1234-1234-123456789abd"
 
-CSE_BASE         = "http://127.0.0.1:8080"
+CSE_BASE         = "http://192.168.1.232:8080"
 CSE_ID           = "cse-in"
 AE_NAME          = "sensor-ae"
 ORIGINATOR       = "CAndroid"

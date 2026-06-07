@@ -25,11 +25,11 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 # -- Configuration -------------------------------------------------------------
-CSE_BASE          = "http://127.0.0.1:8080"
+CSE_BASE          = "http://192.168.1.124:8080"
 CSE_ID            = "cse-in"
 AE_NAME           = "sensor-ae"
 ORIGINATOR        = "CDashboard"
-NOTIFICATION_URL  = "http://127.0.0.1:9000/notify"
+NOTIFICATION_URL  = "http://192.168.1.246:9000/notify"
 SUB_AE_NAME       = "ae-discovery-sub"
 SUB_DATA_PREFIX   = "data-sub"
 DASHBOARD_PORT    = 9000

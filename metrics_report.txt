@@ -5,9 +5,9 @@
 
 COLLECTION SUMMARY
   Duration:          300.0 s
-  Total messages:    52
-  Message rate:      10.4 msg/min
-  Devices:           {'OneM2M-Sensor': 52}
+  Total messages:    40
+  Message rate:      8.0 msg/min
+  Devices:           {'OneM2M-Sensor': 40}
   Containers:        ['sensor-onem2msensor']
 
 LATENCY BREAKDOWN
@@ -28,32 +28,32 @@ LATENCY BREAKDOWN
       Stdev:   0 ms
 
   [3] Total End-to-End  (Android -> CSE -> Collector)
-      Samples: 52
-      Min:     1584.52 ms
-      Max:     2502.0 ms
-      Mean:    2025.5 ms
-      Median:  2110.56 ms
-      Stdev:   289.66 ms
+      Samples: 40
+      Min:     749.91 ms
+      Max:     3916.63 ms
+      Mean:    1381.25 ms
+      Median:  917.76 ms
+      Stdev:   1000.32 ms
 
 INTER-ARRIVAL TIME  (between consecutive messages at collector)
-  Min:     1.66 ms
-  Max:     29558.3 ms
-  Mean:    5792.02 ms
-  Median:  222.62 ms
-  Stdev:   8833.92 ms
+  Min:     1.92 ms
+  Max:     29859.06 ms
+  Mean:    7573.56 ms
+  Median:  1910.06 ms
+  Stdev:   9826.81 ms
 
 BLE BATCHING ANALYSIS
-  Burst messages:  26 (51.0%)
+  Burst messages:  18 (46.2%)
   Threshold:       < 1000 ms between messages
   Note: High burst % confirms Android BLE/WiFi scheduler buffering
 
 PAYLOAD ANALYSIS
-  Raw sensor JSON:   min=230B  mean=238B  max=242B
-  oneM2M CIN total:  min=562B  mean=570B  max=574B
-  Protocol overhead: mean=58.25%  max=59.07%
+  Raw sensor JSON:   min=215B  mean=219.18B  max=221B
+  oneM2M CIN total:  min=544B  mean=548.17B  max=550B
+  Protocol overhead: mean=60.02%  max=60.48%
 
 TRANSPORT BREAKDOWN
-  BLE/GATT:    52 messages
+  BLE/GATT:    40 messages
   WiFi/HTTP:   0 messages
   Unknown:     0 messages
 
@@ -64,13 +64,13 @@ RAW JSON:
 {
   "collection": {
     "duration_s": 300.0,
-    "total_messages": 52,
-    "message_rate_per_min": 10.4,
+    "total_messages": 40,
+    "message_rate_per_min": 8.0,
     "containers_observed": [
       "sensor-onem2msensor"
     ],
     "devices": {
-      "OneM2M-Sensor": 52
+      "OneM2M-Sensor": 40
     }
   },
   "cse_latency_ms": {
@@ -90,52 +90,52 @@ RAW JSON:
     "n": 0
   },
   "total_latency_ms": {
-    "n": 52,
-    "min": 1584.52,
-    "max": 2502.0,
-    "mean": 2025.5,
-    "median": 2110.56,
-    "stdev": 289.66
+    "n": 40,
+    "min": 749.91,
+    "max": 3916.63,
+    "mean": 1381.25,
+    "median": 917.76,
+    "stdev": 1000.32
   },
   "inter_arrival_ms": {
-    "n": 51,
-    "min": 1.66,
-    "max": 29558.3,
-    "mean": 5792.02,
-    "median": 222.62,
-    "stdev": 8833.92
+    "n": 39,
+    "min": 1.92,
+    "max": 29859.06,
+    "mean": 7573.56,
+    "median": 1910.06,
+    "stdev": 9826.81
   },
   "burst_analysis": {
-    "burst_messages": 26,
-    "burst_percentage": 51.0,
+    "burst_messages": 18,
+    "burst_percentage": 46.2,
     "burst_threshold_ms": 1000
   },
   "payload_bytes": {
-    "n": 52,
-    "min": 230,
-    "max": 242,
-    "mean": 238,
-    "median": 238.0,
-    "stdev": 2.29
+    "n": 40,
+    "min": 215,
+    "max": 221,
+    "mean": 219.18,
+    "median": 220.0,
+    "stdev": 2.23
   },
   "cin_bytes": {
-    "n": 52,
-    "min": 562,
-    "max": 574,
-    "mean": 570,
-    "median": 570.0,
-    "stdev": 2.29
+    "n": 40,
+    "min": 544,
+    "max": 550,
+    "mean": 548.17,
+    "median": 549.0,
+    "stdev": 2.23
   },
   "oneM2M_overhead_pct": {
-    "n": 52,
-    "min": 57.84,
-    "max": 59.07,
-    "mean": 58.25,
-    "median": 58.25,
+    "n": 40,
+    "min": 59.82,
+    "max": 60.48,
+    "mean": 60.02,
+    "median": 59.93,
     "stdev": 0.24
   },
   "transport_breakdown": {
-    "BLE_GATT": 52,
+    "BLE_GATT": 40,
     "WiFi_HTTP": 0,
     "unknown": 0
   }

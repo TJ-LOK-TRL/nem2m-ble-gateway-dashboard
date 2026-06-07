@@ -31,11 +31,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 
 # -- Configuration -------------------------------------------------------------
-CSE_BASE            = "http://127.0.0.1:8080"
+CSE_BASE            = "http://192.168.1.232:8080"
 CSE_ID              = "cse-in"
 AE_NAME             = "sensor-ae"
 ORIGINATOR          = "CMetrics"
-NOTIFICATION_URL    = "http://127.0.0.1:9001/notify"
+NOTIFICATION_URL    = "http://192.168.1.246:9001/notify"
 METRICS_PORT        = 9001
 COLLECTION_DURATION = 300  # seconds
 
